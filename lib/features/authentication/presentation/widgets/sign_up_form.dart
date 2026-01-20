@@ -21,7 +21,7 @@ class _SignUpFormState extends State<SignUpForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
+  
   @override
   void dispose() {
     _nameController.dispose();
@@ -30,16 +30,16 @@ class _SignUpFormState extends State<SignUpForm> {
     _confirmPasswordController.dispose();
     super.dispose();
   }
-
+  
   void _handleSignUp() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-            AuthSignUpRequested(
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-              name: _nameController.text.trim(),
-            ),
-          );
+        AuthSignUpRequested(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          name: _nameController.text.trim(),
+        ),
+      );
     }
   }
 
@@ -64,67 +64,69 @@ class _SignUpFormState extends State<SignUpForm> {
       },
       builder: (context, state) {
         final isLoading = state is AuthLoading;
-
-        return SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            physics: const BouncingScrollPhysics(),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomTextField(
-                    controller: _nameController,
-                    hintText: 'Enter your name',
-                    label: 'Full Name',
-                    prefixIcon: Icons.person_outline,
-                    validator: Validators.validateName,
-                    enabled: !isLoading,
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    controller: _emailController,
-                    hintText: 'Enter your email',
-                    label: 'Email',
-                    prefixIcon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: Validators.validateEmail,
-                    enabled: !isLoading,
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    controller: _passwordController,
-                    hintText: 'Enter your password',
-                    label: 'Password',
-                    prefixIcon: Icons.lock_outline,
-                    isPassword: true,
-                    validator: Validators.validatePassword,
-                    enabled: !isLoading,
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    controller: _confirmPasswordController,
-                    hintText: 'Confirm your password',
-                    label: 'Confirm Password',
-                    prefixIcon: Icons.lock_outline,
-                    isPassword: true,
-                    validator: (value) => Validators.validateConfirmPassword(
-                      value,
-                      _passwordController.text,
-                    ),
-                    enabled: !isLoading,
-                  ),
-                  const SizedBox(height: 32),
-                  CustomButton(
-                    text: 'Sign Up',
-                    onPressed: _handleSignUp,
-                    isLoading: isLoading,
-                    icon: Icons.person_add,
-                  ),
-                ],
+        
+        return Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomTextField(
+                controller: _nameController,
+                hintText: 'Enter your name',
+                label: 'Full Name',
+                prefixIcon: Icons.person_outline,
+                validator: Validators.validateName,
+                enabled: !isLoading,
               ),
-            ),
+              
+              const SizedBox(height: 20),
+              
+              CustomTextField(
+                controller: _emailController,
+                hintText: 'Enter your email',
+                label: 'Email',
+                prefixIcon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+                validator: Validators.validateEmail,
+                enabled: !isLoading,
+              ),
+              
+              const SizedBox(height: 20),
+              
+              CustomTextField(
+                controller: _passwordController,
+                hintText: 'Enter your password',
+                label: 'Password',
+                prefixIcon: Icons.lock_outline,
+                isPassword: true,
+                validator: Validators.validatePassword,
+                enabled: !isLoading,
+              ),
+              
+              const SizedBox(height: 20),
+              
+              CustomTextField(
+                controller: _confirmPasswordController,
+                hintText: 'Confirm your password',
+                label: 'Confirm Password',
+                prefixIcon: Icons.lock_outline,
+                isPassword: true,
+                validator: (value) => Validators.validateConfirmPassword(
+                  value,
+                  _passwordController.text,
+                ),
+                enabled: !isLoading,
+              ),
+              
+              const SizedBox(height: 32),
+              
+              CustomButton(
+                text: 'Sign Up',
+                onPressed: _handleSignUp,
+                isLoading: isLoading,
+                icon: Icons.person_add,
+              ),
+            ],
           ),
         );
       },

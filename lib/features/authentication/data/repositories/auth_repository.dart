@@ -23,38 +23,44 @@ class AuthRepository {
   }
   
   // Sign up with email and password
-  Future<UserModel> signUp({
-    required String email,
-    required String password,
-    required String name,
-  }) async {
-    try {
-      _logger.info('Attempting to sign up user: $email');
+Future<UserModel> signUp({
+  required String email,
+  required String password,
+  required String name,
+}) async {
+  try {
+    _logger.info('Attempting to sign up user: $email');
+    
+    final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    
+    // Update display name - FIXED VERSION
+    if (userCredential.user != null) {
+      await userCredential.user!.updateDisplayName(name);
+      await userCredential.user!.reload(); // Reload to get updated info
       
-      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      // Get the fresh user data
+      final updatedUser = _firebaseAuth.currentUser;
       
-      // Update display name
-      await userCredential.user?.updateDisplayName(name);
-      await userCredential.user?.reload();
-      
-      final user = _firebaseAuth.currentUser;
-      if (user == null) {
+      if (updatedUser == null) {
         throw Exception('User creation failed');
       }
       
-      _logger.info('User signed up successfully: ${user.uid}');
-      return UserModel.fromFirebaseUser(user);
-    } on FirebaseAuthException catch (e) {
-      _logger.error('Firebase Auth Error during sign up', e);
-      throw _handleAuthException(e);
-    } catch (e) {
-      _logger.error('Unknown error during sign up', e);
-      throw Exception('An unexpected error occurred. Please try again.');
+      _logger.info('User signed up successfully: ${updatedUser.uid} with name: ${updatedUser.displayName}');
+      return UserModel.fromFirebaseUser(updatedUser);
     }
+    
+    throw Exception('User creation failed');
+  } on FirebaseAuthException catch (e) {
+    _logger.error('Firebase Auth Error during sign up', e);
+    throw _handleAuthException(e);
+  } catch (e) {
+    _logger.error('Unknown error during sign up', e);
+    throw Exception('An unexpected error occurred. Please try again.');
   }
+}
   
   // Sign in with email and password
   Future<UserModel> signIn({

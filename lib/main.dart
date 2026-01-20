@@ -6,6 +6,11 @@ import 'core/constants/route_constants.dart';
 import 'features/authentication/data/repositories/auth_repository.dart';
 import 'features/authentication/presentation/bloc/auth_bloc.dart';
 import 'features/authentication/presentation/pages/auth_page.dart';
+import 'features/products/data/repositories/product_repository.dart';
+import 'features/products/presentation/bloc/product_bloc.dart';
+import 'features/products/presentation/pages/home_page.dart';
+import 'features/products/presentation/pages/product_detail_page.dart';
+import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/splash/presentation/pages/splash_page.dart';
 import 'managers/logger_manager.dart';
 
@@ -27,12 +32,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (context) => AuthRepository(),
-      child: BlocProvider(
-        create: (context) => AuthBloc(
-          authRepository: context.read<AuthRepository>(),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(
+          create: (context) => AuthRepository(),
         ),
+        RepositoryProvider(
+          create: (context) => ProductRepository(),
+        ),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => AuthBloc(
+              authRepository: context.read<AuthRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => ProductBloc(
+              productRepository: context.read<ProductRepository>(),
+            ),
+          ),
+        ],
         child: MaterialApp(
           title: 'Product Manager',
           debugShowCheckedModeBanner: false,
@@ -40,13 +61,51 @@ class MyApp extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.light,
           initialRoute: RouteConstants.splash,
-          routes: {
-            RouteConstants.splash: (context) => const SplashPage(),
-            RouteConstants.auth: (context) => const AuthPage(),
-            // We'll add home route later
-          },
+          onGenerateRoute: _generateRoute,
         ),
       ),
     );
+  }
+  
+  // Route generator function
+  static Route<dynamic> _generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case RouteConstants.splash:
+        return MaterialPageRoute(
+          builder: (_) => const SplashPage(),
+        );
+        
+      case RouteConstants.auth:
+        return MaterialPageRoute(
+          builder: (_) => const AuthPage(),
+        );
+        
+      case RouteConstants.home:
+        return MaterialPageRoute(
+          builder: (_) => const HomePage(),
+        );
+        
+      case RouteConstants.productDetail:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ProductDetailPage(
+            productId: args?['productId'] ?? 0,
+          ),
+        );
+        
+      case RouteConstants.profile:
+        return MaterialPageRoute(
+          builder: (_) => const ProfilePage(),
+        );
+        
+      default:
+        return MaterialPageRoute(
+          builder: (_) => Scaffold(
+            body: Center(
+              child: Text('No route defined for ${settings.name}'),
+            ),
+          ),
+        );
+    }
   }
 }
