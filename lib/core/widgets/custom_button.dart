@@ -10,7 +10,7 @@ class CustomButton extends StatelessWidget {
   final IconData? icon;
   final double? width;
   final double height;
-  
+
   const CustomButton({
     Key? key,
     required this.text,
@@ -27,7 +27,7 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     if (isOutlined) {
       return SizedBox(
         width: width ?? double.infinity,
@@ -61,10 +61,14 @@ class CustomButton extends StatelessWidget {
                       Icon(icon, size: 20),
                       const SizedBox(width: 8),
                     ],
-                    Text(
-                      text,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: textColor ?? theme.primaryColor,
+                    Flexible(
+                      child: Text(
+                        text,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: textColor ?? theme.primaryColor,
+                        ),
                       ),
                     ),
                   ],
@@ -72,7 +76,7 @@ class CustomButton extends StatelessWidget {
         ),
       );
     }
-    
+
     return SizedBox(
       width: width ?? double.infinity,
       height: height,
@@ -100,10 +104,14 @@ class CustomButton extends StatelessWidget {
                     Icon(icon, size: 20),
                     const SizedBox(width: 8),
                   ],
-                  Text(
-                    text,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: textColor ?? Colors.white,
+                  Flexible(
+                    child: Text(
+                      text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: textColor ?? Colors.white,
+                      ),
                     ),
                   ),
                 ],

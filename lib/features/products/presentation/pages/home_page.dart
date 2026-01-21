@@ -27,16 +27,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onItemTapped(int index) {
-  if (index == 1) {
-    // Navigate to profile
-    Navigator.of(context).pushNamed(RouteConstants.profile).then((_) {
-      // Reset selection when coming back
-      setState(() {
-        _selectedIndex = 0;
+    if (index == 1) {
+      // Navigate to profile
+      Navigator.of(context).pushNamed(RouteConstants.profile).then((_) {
+        // Reset selection when coming back
+        setState(() {
+          _selectedIndex = 0;
+        });
       });
-    });
+    }
   }
-}
 
   Future<void> _handleRefresh() async {
     context.read<ProductBloc>().add(const RefreshProducts());
@@ -96,6 +96,25 @@ class _HomePageState extends State<HomePage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
+              ),
+            );
+          } else if (state is ProductOperationFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            );
+          } else if (state is ProductError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
               ),
             );
           }

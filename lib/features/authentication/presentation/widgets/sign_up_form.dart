@@ -53,12 +53,32 @@ class _SignUpFormState extends State<SignUpForm> {
               content: Text(state.message),
               backgroundColor: Theme.of(context).colorScheme.error,
               behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
           );
         } else if (state is AuthAuthenticated) {
+          // Clear form
+          _nameController.clear();
+          _emailController.clear();
+          _passwordController.clear();
+          _confirmPasswordController.clear();
+          
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Welcome, ${state.user.displayName ?? 'User'}!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+          
+          // Navigate to home
           Navigator.of(context).pushReplacementNamed(RouteConstants.home);
         }
       },

@@ -3,19 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../authentication/presentation/bloc/auth_bloc.dart';
 import '../../../authentication/presentation/bloc/auth_event.dart';
 import '../../../authentication/presentation/bloc/auth_state.dart';
+import '../../../theme/theme_cubit.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/route_constants.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends StatelessWidget {
   const ProfilePage({Key? key}) : super(key: key);
-
-  @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> {
-  bool _isDarkMode = false;
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
@@ -158,65 +152,55 @@ class _ProfilePageState extends State<ProfilePage> {
                   
                   const SizedBox(height: 40),
                   
-                  // Dark Mode Toggle
+                  // Dark Mode Toggle - WORKING VERSION
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardTheme.color,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(context).dividerColor.withOpacity(0.1),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              _isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                              color: AppColors.primary,
-                              size: 24,
+                    child: BlocBuilder<ThemeCubit, ThemeMode>(
+                      builder: (context, themeMode) {
+                        final isDark = themeMode == ThemeMode.dark;
+                        
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardTheme.color,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(context).dividerColor.withOpacity(0.1),
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Text(
-                              'Dark Mode',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ),
-                          Switch(
-                            value: _isDarkMode,
-                            onChanged: (value) {
-                              setState(() {
-                                _isDarkMode = value;
-                              });
-                              // TODO: Implement theme switching with Bloc/Cubit
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    value 
-                                        ? 'Dark mode enabled (Feature coming soon!)' 
-                                        : 'Light mode enabled',
-                                  ),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              );
-                            },
-                            activeColor: AppColors.primary,
+                                child: Icon(
+                                  isDark ? Icons.dark_mode : Icons.light_mode,
+                                  color: AppColors.primary,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  'Dark Mode',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                              ),
+                              Switch(
+                                value: isDark,
+                                onChanged: (value) {
+                                  context.read<ThemeCubit>().toggleTheme();
+                                },
+                                activeColor: AppColors.primary,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ),
                   

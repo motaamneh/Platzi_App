@@ -11,8 +11,16 @@ class AuthRepository {
   
   // Get current user
   UserModel? get currentUser {
-    final user = _firebaseAuth.currentUser;
-    return user != null ? UserModel.fromFirebaseUser(user) : null;
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user != null) {
+        _logger.info('Current user: ${user.email}, displayName: ${user.displayName}');
+      }
+      return user != null ? UserModel.fromFirebaseUser(user) : null;
+    } catch (e) {
+      _logger.error('Error getting current user', e);
+      return null;
+    }
   }
   
   // Stream of auth state changes
@@ -22,47 +30,59 @@ class AuthRepository {
     });
   }
   
-  // Sign up with email and password
-Future<UserModel> signUp({
-  required String email,
-  required String password,
-  required String name,
-}) async {
-  try {
-    _logger.info('Attempting to sign up user: $email');
-    
-    final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    
-    // Update display name - FIXED VERSION
-    if (userCredential.user != null) {
-      await userCredential.user!.updateDisplayName(name);
-      await userCredential.user!.reload(); // Reload to get updated info
+  // Sign up with email and password - SIMPLIFIED
+  Future<UserModel> signUp({
+    required String email,
+    required String password,
+    required String name,
+  }) async {
+    try {
+      _logger.info('Attempting to sign up user: $email with name: $name');
       
-      // Get the fresh user data
-      final updatedUser = _firebaseAuth.currentUser;
+      // Create user
+      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       
-      if (updatedUser == null) {
+      final user = userCredential.user;
+      if (user == null) {
         throw Exception('User creation failed');
       }
       
-      _logger.info('User signed up successfully: ${updatedUser.uid} with name: ${updatedUser.displayName}');
-      return UserModel.fromFirebaseUser(updatedUser);
+      _logger.info('User created successfully: ${user.uid}');
+      
+      // Update display name
+      try {
+        await user.updateDisplayName(name);
+        _logger.info('Display name updated to: $name');
+      } catch (e) {
+        _logger.warning('Failed to update display name: $e');
+        // Continue anyway - not critical
+      }
+      
+      // Wait for Firebase to sync
+      await Future.delayed(const Duration(milliseconds: 800));
+      
+      // Get updated user
+      final currentUser = _firebaseAuth.currentUser;
+      if (currentUser == null) {
+        throw Exception('Failed to get updated user');
+      }
+      
+      _logger.info('Sign up complete. Display name: ${currentUser.displayName}');
+      return UserModel.fromFirebaseUser(currentUser);
+      
+    } on FirebaseAuthException catch (e) {
+      _logger.error('Firebase Auth Error during sign up', e);
+      throw _handleAuthException(e);
+    } catch (e) {
+      _logger.error('Unknown error during sign up', e);
+      throw Exception('An unexpected error occurred. Please try again.');
     }
-    
-    throw Exception('User creation failed');
-  } on FirebaseAuthException catch (e) {
-    _logger.error('Firebase Auth Error during sign up', e);
-    throw _handleAuthException(e);
-  } catch (e) {
-    _logger.error('Unknown error during sign up', e);
-    throw Exception('An unexpected error occurred. Please try again.');
   }
-}
   
-  // Sign in with email and password
+  // Sign in with email and password - SIMPLIFIED
   Future<UserModel> signIn({
     required String email,
     required String password,
@@ -70,23 +90,36 @@ Future<UserModel> signUp({
     try {
       _logger.info('Attempting to sign in user: $email');
       
+      // Sign in
       final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
       
-      if (userCredential.user == null) {
-        throw Exception('Sign in failed');
+      final user = userCredential.user;
+      if (user == null) {
+        throw Exception('Sign in failed - no user returned');
       }
       
-      _logger.info('User signed in successfully: ${userCredential.user!.uid}');
-      return UserModel.fromFirebaseUser(userCredential.user!);
+      _logger.info('User signed in successfully: ${user.uid}, displayName: ${user.displayName}');
+      
+      // Wait for Firebase to be ready
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Get current user
+      final currentUser = _firebaseAuth.currentUser;
+      if (currentUser == null) {
+        throw Exception('Failed to get current user after sign in');
+      }
+      
+      return UserModel.fromFirebaseUser(currentUser);
+      
     } on FirebaseAuthException catch (e) {
       _logger.error('Firebase Auth Error during sign in', e);
       throw _handleAuthException(e);
     } catch (e) {
       _logger.error('Unknown error during sign in', e);
-      throw Exception('An unexpected error occurred. Please try again.');
+      throw Exception('Failed to sign in. Please try again.');
     }
   }
   
@@ -104,6 +137,8 @@ Future<UserModel> signUp({
   
   // Handle Firebase Auth exceptions
   String _handleAuthException(FirebaseAuthException e) {
+    _logger.warning('Firebase Auth Exception: ${e.code} - ${e.message}');
+    
     switch (e.code) {
       case 'weak-password':
         return 'The password provided is too weak.';
@@ -118,15 +153,15 @@ Future<UserModel> signUp({
       case 'wrong-password':
         return 'Incorrect password. Please try again.';
       case 'invalid-credential':
-        return 'Invalid credentials. Please check your email and password.';
+        return 'Invalid email or password. Please try again.';
       case 'too-many-requests':
         return 'Too many attempts. Please try again later.';
       case 'operation-not-allowed':
-        return 'This operation is not allowed. Please contact support.';
+        return 'This operation is not allowed.';
       case 'network-request-failed':
-        return 'Network error. Please check your internet connection.';
+        return 'Network error. Please check your connection.';
       default:
-        return e.message ?? 'An authentication error occurred.';
+        return e.message ?? 'Authentication failed. Please try again.';
     }
   }
 }

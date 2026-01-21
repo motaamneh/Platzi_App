@@ -12,6 +12,7 @@ import 'features/products/presentation/pages/home_page.dart';
 import 'features/products/presentation/pages/product_detail_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/splash/presentation/pages/splash_page.dart';
+import 'features/theme/theme_cubit.dart';
 import 'managers/logger_manager.dart';
 
 void main() async {
@@ -44,6 +45,9 @@ class MyApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
+            create: (context) => ThemeCubit(),
+          ),
+          BlocProvider(
             create: (context) => AuthBloc(
               authRepository: context.read<AuthRepository>(),
             ),
@@ -54,20 +58,23 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ],
-        child: MaterialApp(
-          title: 'Product Manager',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.light,
-          initialRoute: RouteConstants.splash,
-          onGenerateRoute: _generateRoute,
+        child: BlocBuilder<ThemeCubit, ThemeMode>(
+          builder: (context, themeMode) {
+            return MaterialApp(
+              title: 'Product Manager',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeMode,
+              initialRoute: RouteConstants.splash,
+              onGenerateRoute: _generateRoute,
+            );
+          },
         ),
       ),
     );
   }
   
-  // Route generator function
   static Route<dynamic> _generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case RouteConstants.splash:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/validators.dart';
 import '../data/models/product_model.dart';
 
 class ProductCard extends StatelessWidget {
@@ -7,7 +8,7 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  
+
   const ProductCard({
     Key? key,
     required this.product,
@@ -31,10 +32,21 @@ class ProductCard extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 color: AppColors.background,
-                child: product.images.isNotEmpty
+                child: (product.images.isNotEmpty &&
+                        Validators.isValidImageUrl(product.images.first))
                     ? Image.network(
                         product.images.first,
                         fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                            child: SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        },
                         errorBuilder: (context, error, stackTrace) {
                           return const Center(
                             child: Icon(
@@ -54,7 +66,7 @@ class ProductCard extends StatelessWidget {
                       ),
               ),
             ),
-            
+
             // Product Info
             Expanded(
               flex: 2,
@@ -65,33 +77,39 @@ class ProductCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min, // Added this
                   children: [
                     // Title
-                    Flexible( // Wrapped in Flexible
+                    Flexible(
+                      // Wrapped in Flexible
                       child: Text(
                         product.title,
-                        style: Theme.of(context).textTheme.titleSmall, // Smaller text
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall, // Smaller text
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 4), // Reduced spacing
-                    
+
                     // Price and Actions
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Flexible( // Wrapped in Flexible
+                        Flexible(
+                          // Wrapped in Flexible
                           child: Text(
                             '\$${product.price.toStringAsFixed(2)}',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

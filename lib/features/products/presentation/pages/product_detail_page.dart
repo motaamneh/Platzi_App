@@ -8,10 +8,11 @@ import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/error_widget.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/validators.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final int productId;
-  
+
   const ProductDetailPage({
     Key? key,
     required this.productId,
@@ -23,15 +24,15 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _currentImageIndex = 0;
-  
+
   @override
   void initState() {
     super.initState();
     context.read<ProductBloc>().add(
-      FetchProductDetail(productId: widget.productId),
-    );
+          FetchProductDetail(productId: widget.productId),
+        );
   }
-  
+
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -50,8 +51,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             onPressed: () {
               Navigator.of(dialogContext).pop();
               context.read<ProductBloc>().add(
-                DeleteProduct(productId: widget.productId),
-              );
+                    DeleteProduct(productId: widget.productId),
+                  );
               Navigator.of(context).pop(); // Go back to home
             },
             child: const Text(
@@ -80,34 +81,82 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ),
               ),
             );
+          } else if (state is ProductOperationFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            );
+          } else if (state is ProductDetailError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
           }
         },
         builder: (context, state) {
           if (state is ProductDetailLoading) {
             return const LoadingWidget(message: 'Loading product details...');
           }
-          
+
           if (state is ProductDetailError) {
             return Scaffold(
               appBar: AppBar(),
               body: CustomErrorWidget(
                 message: state.message,
                 onRetry: () => context.read<ProductBloc>().add(
-                  FetchProductDetail(productId: widget.productId),
-                ),
+                      FetchProductDetail(productId: widget.productId),
+                    ),
               ),
             );
           }
-          
+
           if (state is ProductDetailLoaded) {
             final product = state.product;
-            
+
             return CustomScrollView(
               slivers: [
                 // App Bar with Image
                 SliverAppBar(
                   expandedHeight: 400,
                   pinned: true,
+                  // Explicit leading button with contrasted circular background
+                  leading: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 12.0, top: 8.0),
+                      child: Material(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white.withOpacity(0.12)
+                            : Colors.black.withOpacity(0.06),
+                        shape: const CircleBorder(),
+                        child: IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: Icon(
+                            Icons.arrow_back,
+                            size: 20,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppColors.textPrimaryDark
+                                    : AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Ensure the leading/back icon has sufficient contrast in dark mode
+                  iconTheme: IconThemeData(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimary,
+                  ),
                   flexibleSpace: FlexibleSpaceBar(
                     background: Stack(
                       fit: StackFit.expand,
@@ -122,19 +171,45 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               });
                             },
                             itemBuilder: (context, index) {
-                              return Image.network(
-                                product.images[index],
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: AppColors.background,
-                                    child: const Icon(
-                                      Icons.image_not_supported,
-                                      size: 80,
-                                      color: AppColors.textHint,
-                                    ),
-                                  );
-                                },
+                              final img = product.images[index];
+                              if (Validators.isValidImageUrl(img)) {
+                                return Image.network(
+                                  img,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      color: AppColors.background,
+                                      child: const Center(
+                                        child: SizedBox(
+                                          width: 40,
+                                          height: 40,
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: AppColors.background,
+                                      child: const Icon(
+                                        Icons.image_not_supported,
+                                        size: 80,
+                                        color: AppColors.textHint,
+                                      ),
+                                    );
+                                  },
+                                );
+                              }
+
+                              return Container(
+                                color: AppColors.background,
+                                child: const Icon(
+                                  Icons.image,
+                                  size: 80,
+                                  color: AppColors.textHint,
+                                ),
                               );
                             },
                           )
@@ -147,7 +222,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               color: AppColors.textHint,
                             ),
                           ),
-                        
+
                         // Gradient Overlay
                         Positioned(
                           bottom: 0,
@@ -167,7 +242,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                           ),
                         ),
-                        
+
                         // Image Indicator
                         if (product.images.length > 1)
                           Positioned(
@@ -179,7 +254,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               children: List.generate(
                                 product.images.length,
                                 (index) => Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 4),
                                   width: 8,
                                   height: 8,
                                   decoration: BoxDecoration(
@@ -196,7 +272,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     ),
                   ),
                 ),
-                
+
                 // Product Details
                 SliverToBoxAdapter(
                   child: Padding(
@@ -216,34 +292,40 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                           child: Text(
                             product.category.name,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         // Product Title
                         Text(
                           product.title,
                           style: Theme.of(context).textTheme.displaySmall,
                         ),
-                        
+
                         const SizedBox(height: 12),
-                        
+
                         // Price
                         Text(
                           '\$${product.price.toStringAsFixed(2)}',
-                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayMedium
+                              ?.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // Description Section
                         Text(
                           'Description',
@@ -252,13 +334,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         const SizedBox(height: 8),
                         Text(
                           product.description,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            height: 1.6,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    height: 1.6,
+                                  ),
                         ),
-                        
+
                         const SizedBox(height: 32),
-                        
+
                         // Action Buttons
                         Row(
                           children: [
@@ -268,16 +351,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 onPressed: () {
                                   showDialog(
                                     context: context,
-                                    builder: (dialogContext) => UpdateProductDialog(
+                                    builder: (dialogContext) =>
+                                        UpdateProductDialog(
                                       product: product,
                                       onUpdate: (title, price) {
                                         context.read<ProductBloc>().add(
-                                          UpdateProduct(
-                                            productId: product.id,
-                                            title: title,
-                                            price: price,
-                                          ),
-                                        );
+                                              UpdateProduct(
+                                                productId: product.id,
+                                                title: title,
+                                                price: price,
+                                              ),
+                                            );
                                       },
                                     ),
                                   );
@@ -297,7 +381,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -306,7 +390,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ],
             );
           }
-          
+
           return const SizedBox.shrink();
         },
       ),
