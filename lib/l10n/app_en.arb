@@ -1,0 +1,30 @@
+
+{
+  "@@locale": "en",
+  "appTitle": "Product Manager",
+  "splashWelcome": "Welcome",
+  "signIn": "Sign In",
+  "signUp": "Sign Up",
+  "email": "Email",
+  "password": "Password",
+  "name": "Name",
+  "logout": "Logout",
+  "home": "Home",
+  "profile": "Profile",
+  "products": "Products",
+  "productDetails": "Product Details",
+  "addProduct": "Add Product",
+  "update": "Update",
+  "delete": "Delete",
+  "loading": "Loading...",
+  "error": "An error occurred",
+  "emptyState": "Nothing to display",
+  "noRouteDefined": "No route defined for {routeName}",
+  "@noRouteDefined": {
+    "description": "Shows when no route is defined. Argument: routeName"
+  },
+  "unknown": "Unknown",
+  "save": "Save",
+  "cancel": "Cancel",
+  "search": "Search"
+}

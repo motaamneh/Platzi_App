@@ -1,0 +1,29 @@
+{
+  "@@locale": "ar",
+  "appTitle": "مدير المنتجات",
+  "splashWelcome": "مرحبًا",
+  "signIn": "تسجيل الدخول",
+  "signUp": "إنشاء حساب",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "name": "الاسم",
+  "logout": "تسجيل الخروج",
+  "home": "الرئيسية",
+  "profile": "الملف الشخصي",
+  "products": "المنتجات",
+  "productDetails": "تفاصيل المنتج",
+  "addProduct": "إضافة منتج",
+  "update": "تحديث",
+  "delete": "حذف",
+  "loading": "جارٍ التحميل...",
+  "error": "حدث خطأ",
+  "emptyState": "لا توجد بيانات للعرض",
+  "noRouteDefined": "لا يوجد مسار معرف لـ {routeName}",
+  "@noRouteDefined": {
+    "description": "يظهر عندما لا يكون هناك مسار معرف. المعامل: routeName"
+  },
+  "unknown": "غير معروف",
+  "save": "حفظ",
+  "cancel": "إلغاء",
+  "search": "بحث"
+}

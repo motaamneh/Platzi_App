@@ -17,14 +17,14 @@ import 'managers/logger_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     await Firebase.initializeApp();
     LoggerManager().info('Firebase initialized successfully');
   } catch (e) {
     LoggerManager().error('Firebase initialization failed', e);
   }
-  
+
   runApp(const MyApp());
 }
 
@@ -47,12 +47,12 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => ThemeCubit(),
           ),
-          BlocProvider(
+          BlocProvider<AuthBloc>(
             create: (context) => AuthBloc(
               authRepository: context.read<AuthRepository>(),
             ),
           ),
-          BlocProvider(
+          BlocProvider<ProductBloc>(
             create: (context) => ProductBloc(
               productRepository: context.read<ProductRepository>(),
             ),
@@ -74,24 +74,24 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
-  
+
   static Route<dynamic> _generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case RouteConstants.splash:
         return MaterialPageRoute(
           builder: (_) => const SplashPage(),
         );
-        
+
       case RouteConstants.auth:
         return MaterialPageRoute(
           builder: (_) => const AuthPage(),
         );
-        
+
       case RouteConstants.home:
         return MaterialPageRoute(
           builder: (_) => const HomePage(),
         );
-        
+
       case RouteConstants.productDetail:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
@@ -99,12 +99,12 @@ class MyApp extends StatelessWidget {
             productId: args?['productId'] ?? 0,
           ),
         );
-        
+
       case RouteConstants.profile:
         return MaterialPageRoute(
           builder: (_) => const ProfilePage(),
         );
-        
+
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

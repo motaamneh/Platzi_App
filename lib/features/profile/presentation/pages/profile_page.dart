@@ -58,12 +58,12 @@ class ProfilePage extends StatelessWidget {
         builder: (context, state) {
           if (state is AuthAuthenticated) {
             final user = state.user;
-            
+
             return SingleChildScrollView(
               child: Column(
                 children: [
                   const SizedBox(height: 40),
-                  
+
                   // Profile Picture
                   Container(
                     width: 120,
@@ -88,37 +88,40 @@ class ProfilePage extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        (user.displayName?.isNotEmpty == true 
+                        (user.displayName?.isNotEmpty == true
                             ? user.displayName!.substring(0, 1).toUpperCase()
                             : user.email.substring(0, 1).toUpperCase()),
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.displayLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // User Name
                   Text(
-                    user.displayName?.isNotEmpty == true ? user.displayName! : 'User',
+                    user.displayName?.isNotEmpty == true
+                        ? user.displayName!
+                        : 'User',
                     style: Theme.of(context).textTheme.displaySmall,
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // User Email
                   Text(
                     user.email,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
-                  
+
                   const SizedBox(height: 40),
-                  
+
                   // Profile Info Cards
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -135,8 +138,8 @@ class ProfilePage extends StatelessWidget {
                           context,
                           icon: Icons.person,
                           title: 'Display Name',
-                          value: user.displayName?.isNotEmpty == true 
-                              ? user.displayName! 
+                          value: user.displayName?.isNotEmpty == true
+                              ? user.displayName!
                               : 'Not set',
                         ),
                         const SizedBox(height: 16),
@@ -149,23 +152,25 @@ class ProfilePage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 40),
-                  
+
                   // Dark Mode Toggle - WORKING VERSION
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: BlocBuilder<ThemeCubit, ThemeMode>(
                       builder: (context, themeMode) {
                         final isDark = themeMode == ThemeMode.dark;
-                        
+
                         return Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Theme.of(context).cardTheme.color,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Theme.of(context).dividerColor.withOpacity(0.1),
+                              color: Theme.of(context)
+                                  .dividerColor
+                                  .withOpacity(0.1),
                             ),
                           ),
                           child: Row(
@@ -187,7 +192,8 @@ class ProfilePage extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   'Dark Mode',
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
                                 ),
                               ),
                               Switch(
@@ -203,9 +209,9 @@ class ProfilePage extends StatelessWidget {
                       },
                     ),
                   ),
-                  
-                  const SizedBox(height: 40),
-                  
+
+                  const SizedBox(height: 16),
+
                   // Logout Button
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -216,13 +222,13 @@ class ProfilePage extends StatelessWidget {
                       backgroundColor: AppColors.error,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 40),
                 ],
               ),
             );
           }
-          
+
           return const Center(
             child: CircularProgressIndicator(),
           );
@@ -230,7 +236,7 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildInfoCard(
     BuildContext context, {
     required IconData icon,
@@ -269,8 +275,8 @@ class ProfilePage extends StatelessWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
